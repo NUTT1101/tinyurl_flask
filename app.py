@@ -1,5 +1,5 @@
-from flask import Flask, request, jsonify, redirect, current_app, render_template
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Role, UserRole, URL, URLAccess
 from config import Config
@@ -9,6 +9,8 @@ import qrcode
 from io import BytesIO
 import base64
 import logging
+import pymysql
+pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -45,9 +47,24 @@ def generate_qr_code(url):
 def index():
     return render_template('index.html')
 
-@app.route('/register')
+@app.route('/register', methods=['POST'])
 def register():
-    return render_template('register.html')
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"message": "Username already exists"}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({"message": "Email already exists"}), 400
+
+    hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+    new_user = User(username=username, email=email, password_hash=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "User created successfully"}), 201
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -55,9 +72,23 @@ def login():
     user = User.query.filter_by(username=data.get('username')).first()
     if user and check_password_hash(user.password_hash, data.get('password')):
         access_token = create_access_token(identity=user.id)
-        current_app.logger.info(f"User logged in: {user.username}")
-        return jsonify(access_token=access_token), 200
+        response = jsonify({"message": "Login successful"})
+        set_access_cookies(response, access_token)
+        return response, 200
     return jsonify({"message": "Invalid username or password"}), 401
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    response = jsonify({"message": "Logout successful"})
+    unset_jwt_cookies(response)
+    return response, 200
+
+@app.route('/dashboard')
+@jwt_required()
+def dashboard():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    return render_template('dashboard.html', username=user.username)
 
 @app.route('/shorten', methods=['POST'])
 @jwt_required()

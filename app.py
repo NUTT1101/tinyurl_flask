@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Role, UserRole, URL, URLAccess
 from config import Config
@@ -45,7 +45,13 @@ def generate_qr_code(url):
 # 路由
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        verify_jwt_in_request()
+        # 如果驗證成功，重定向到儀表板
+        return redirect(url_for('dashboard'))
+    except:
+        # 如果驗證失敗（令牌不存在或已過期），顯示登入頁面
+        return render_template('index.html')
 
 @app.route('/register', methods=['POST'])
 def register():

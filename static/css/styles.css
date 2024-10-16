@@ -93,3 +93,182 @@ header {
 .animate__fadeOut {
     animation: fadeOut 0.3s ease-in forwards;
 }
+
+/* 在現有樣式的基礎上添加或修改 */
+
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.copy-icon, .show-qr-icon {
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.copy-icon:hover, .show-qr-icon:hover {
+    color: #007bff;
+}
+
+#urlList {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.url-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.url-item:last-child {
+    border-bottom: none;
+}
+
+.logout-link {
+    color: #dc3545;
+}
+
+.logout-link:hover {
+    color: #bd2130;
+}
+
+#alreadyShortenedMessage {
+    color: #dc3545;
+}
+
+.copy-success-icon {
+    color: #28a745;
+}
+
+#qrCodeContainer {
+    display: flex;
+    justify-content: center;
+}
+
+/* 在現有樣式的基礎上添加 */
+
+.btn-lg.px-5 {
+    font-size: 1.25rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    min-width: 150px;
+}
+
+@media (min-width: 768px) {
+    .btn-lg.px-5 {
+        min-width: 200px;
+    }
+}
+
+/* 在現有樣式的基礎上添加 */
+
+.animate__animated {
+    animation-duration: 0.5s;
+}
+
+.animate__fadeOutLeft {
+    animation-name: fadeOutLeft;
+}
+
+.animate__fadeInRight {
+    animation-name: fadeInRight;
+}
+
+.animate__fadeOutRight {
+    animation-name: fadeOutRight;
+}
+
+.animate__fadeInLeft {
+    animation-name: fadeInLeft;
+}
+
+@keyframes fadeOutLeft {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(-100%, 0, 0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translate3d(100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes fadeOutRight {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translate3d(100%, 0, 0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(-100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* 添加簡單的過渡效果 */
+#shortenUrlSection, #myUrlsSection {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.section-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.section-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* 可以根據要調整其他樣式 */
+
+.navbar-nav .nav-item {
+    margin-left: 10px;
+}
+
+.navbar-nav .nav-btn {
+    color: #495057;  /* 深灰色作為默認文字顏色 */
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.navbar-nav .nav-btn:hover,
+.navbar-nav .nav-btn.active {
+    color: #007bff;  /* 懸停和活動狀態使用藍色 */
+    background-color: #e9ecef;  /* 淺灰色背景 */
+}
+
+.navbar-nav .nav-btn-danger {
+    color: #dc3545;  /* 紅色文字 */
+}
+
+.navbar-nav .nav-btn-danger:hover {
+    color: #fff;  /* 白色文字 */
+    background-color: #dc3545;  /* 紅色背景 */
+}
+
+/* 為當前活動頁面添加底部邊框 */
+.navbar-nav .nav-btn.active {
+    border-bottom: 2px solid #007bff;
+}

@@ -151,18 +151,25 @@ def redirect_url(short_url):
 
     return redirect(url.original_url)
 
-@app.route('/my_urls', methods=['GET'])
+@app.route('/my_urls')
 @jwt_required()
-def get_my_urls():
-    user_id = get_jwt_identity()
-    urls = URL.query.filter_by(user_id=user_id).all()
+def my_urls():
+    current_user = get_jwt_identity()
+    return render_template('my_urls.html', username=current_user)
+
+@app.route('/api/my_urls')
+@jwt_required()
+def api_my_urls():
+    current_user = get_jwt_identity()
+    user = User.query.filter_by(username=current_user).first()
+    urls = URL.query.filter_by(user_id=user.id).all()
     return jsonify([{
-        "id": url.id,
-        "original_url": url.original_url,
-        "short_url": f"{request.host_url}{url.short_url}",
-        "click_count": url.click_count,
-        "created_at": url.created_at.isoformat()
-    } for url in urls]), 200
+        'id': url.id,
+        'original_url': url.original_url,
+        'short_url': url.short_url,
+        'click_count': url.click_count,
+        'created_at': url.created_at.isoformat()
+    } for url in urls])
 
 @app.route('/url/<int:url_id>', methods=['PUT'])
 @jwt_required()

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for, current_app
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies, verify_jwt_in_request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Role, UserRole, URL, URLAccess
@@ -160,9 +160,18 @@ def my_urls():
 @app.route('/api/my_urls')
 @jwt_required()
 def api_my_urls():
-    current_user = get_jwt_identity()
-    user = User.query.filter_by(username=current_user).first()
-    urls = URL.query.filter_by(user_id=user.id).all()
+    current_user_id = get_jwt_identity()
+    logging.info(f"Current user ID: {current_user_id}")
+    
+    user = User.query.get(current_user_id)
+    if user is None:
+        logging.warning(f"User not found for ID: {current_user_id}")
+        return jsonify({"error": "User not found"}), 404
+    
+    logging.info(f"User found: {user.username}, ID: {user.id}")
+    
+    urls = URL.query.filter(URL.user_id == user.id, URL.id.isnot(None)).all()
+    
     return jsonify([{
         'id': url.id,
         'original_url': url.original_url,

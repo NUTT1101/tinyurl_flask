@@ -131,89 +131,46 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/my_urls')
         .then(response => response.json())
         .then(data => {
-            urlList.innerHTML = data.map(url => `
-                <div class="url-item mb-3">
-                    <p>短網址: <a href="${url.short_url}" target="_blank">${url.short_url}</a> 
-                       <i class="bi bi-clipboard copy-icon" data-clipboard-text="${url.short_url}"></i>
-                       <i class="bi bi-qr-code show-qr-icon" data-url="${url.short_url}"></i>
-                    </p>
-                    <p>原始網址: ${url.original_url}</p>
-                    <p>點擊次數: ${url.click_count}</p>
-                    <p>創建時間: ${new Date(url.created_at).toLocaleString()}</p>
-                    <button class="btn btn-sm btn-danger delete-url" data-id="${url.id}">刪除</button>
-                    <button class="btn btn-sm btn-primary edit-url" data-id="${url.id}">編輯</button>
+            urlList.innerHTML = `
+                <div class="url-list">
+                    ${data.map(url => `
+                        <div class="url-item card mb-3">
+                            <div class="card-body p-2">
+                                <h5 class="card-title mb-1 text-truncate">
+                                    <a href="${url.short_url}" target="_blank" title="${url.short_url}">${url.short_url}</a>
+                                </h5>
+                                <p class="card-text mb-1 small text-muted text-truncate" title="${url.original_url}">
+                                    ${url.original_url}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted">點擊: ${url.click_count}</small>
+                                    <small class="text-muted">${new Date(url.created_at).toLocaleString()}</small>
+                                </div>
+                                <div class="btn-group btn-group-sm w-100" role="group">
+                                    <button class="btn btn-outline-secondary copy-icon" data-clipboard-text="${url.short_url}" title="複製">
+                                        <i class="bi bi-clipboard"></i> 複製
+                                    </button>
+                                    <button class="btn btn-outline-secondary show-qr-icon" data-url="${url.short_url}" title="QR碼">
+                                        <i class="bi bi-qr-code"></i> QR碼
+                                    </button>
+                                    <button class="btn btn-outline-primary edit-url" data-id="${url.id}" title="編輯">
+                                        <i class="bi bi-pencil"></i> 編輯
+                                    </button>
+                                    <button class="btn btn-outline-danger delete-url" data-id="${url.id}" title="刪除">
+                                        <i class="bi bi-trash"></i> 刪除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
-            `).join('');
+            `;
 
-            // 添加刪除和編輯事件監聽器
-            document.querySelectorAll('.delete-url').forEach(button => {
-                button.addEventListener('click', deleteUrl);
-            });
-            document.querySelectorAll('.edit-url').forEach(button => {
-                button.addEventListener('click', editUrl);
-            });
-            document.querySelectorAll('.show-qr-icon').forEach(icon => {
-                icon.addEventListener('click', showQRCode);
-            });
-        });
-    }
-
-    // 刪除URL
-    function deleteUrl(e) {
-        const urlId = e.target.dataset.id;
-        if (confirm('確定要刪除這個短網址嗎？')) {
-            fetch(`/api/url/${urlId}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                fetchAndDisplayUrls();
-            });
-        }
-    }
-
-    // 編輯URL
-    function editUrl(e) {
-        const urlId = e.target.dataset.id;
-        const newUrl = prompt('請輸入新的原始網址：');
-        if (newUrl) {
-            fetch(`/api/url/${urlId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ original_url: newUrl }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                fetchAndDisplayUrls();
-            });
-        }
-    }
-
-    // 顯示QR碼
-    function showQRCode(e) {
-        const url = e.target.dataset.url;
-        const qrCodeContainer = document.createElement('div');
-        new QRCode(qrCodeContainer, {
-            text: url,
-            width: 256,
-            height: 256
-        });
-        const modal = document.createElement('div');
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        modal.style.display = 'flex';
-        modal.style.justifyContent = 'center';
-        modal.style.alignItems = 'center';
-        modal.appendChild(qrCodeContainer);
-        document.body.appendChild(modal);
-        modal.addEventListener('click', () => {
-            document.body.removeChild(modal);
+            // 添加事件監聽器
+            addUrlEventListeners();
+        })
+        .catch(error => {
+            console.error('Error fetching URLs:', error);
         });
     }
 
@@ -236,3 +193,37 @@ document.addEventListener('DOMContentLoaded', function() {
         showSection('myurls');
     }
 });
+
+function addUrlEventListeners() {
+    // 複製按鈕
+    new ClipboardJS('.copy-icon');
+    document.querySelectorAll('.copy-icon').forEach(icon => {
+        icon.addEventListener('click', function() {
+            // 顯示複製成功提示
+        });
+    });
+
+    // QR碼按鈕
+    document.querySelectorAll('.show-qr-icon').forEach(icon => {
+        icon.addEventListener('click', function() {
+            const url = this.getAttribute('data-url');
+            showQRCode(url);
+        });
+    });
+
+    // 編輯按鈕
+    document.querySelectorAll('.edit-url').forEach(button => {
+        button.addEventListener('click', function() {
+            const urlId = this.getAttribute('data-id');
+            editUrl(urlId);
+        });
+    });
+
+    // 刪除按鈕
+    document.querySelectorAll('.delete-url').forEach(button => {
+        button.addEventListener('click', function() {
+            const urlId = this.getAttribute('data-id');
+            deleteUrl(urlId);
+        });
+    });
+}

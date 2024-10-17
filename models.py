@@ -32,7 +32,7 @@ class URL(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     click_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
-    accesses = db.relationship('URLAccess', backref='url', lazy='dynamic')
+    accesses = db.relationship('URLAccess', backref='url', lazy='dynamic', cascade='all, delete-orphan')
 
 class URLAccess(db.Model):
     __tablename__ = 'url_access'

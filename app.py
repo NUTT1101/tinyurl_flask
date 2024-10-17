@@ -193,11 +193,52 @@ def update_url(url_id):
 @app.route('/url/<int:url_id>', methods=['DELETE'])
 @jwt_required()
 def delete_url(url_id):
-    user_id = get_jwt_identity()
-    url = URL.query.filter_by(id=url_id, user_id=user_id).first_or_404()
-    db.session.delete(url)
-    db.session.commit()
-    return jsonify({"message": "URL deleted successfully"}), 200
+    current_user = get_jwt_identity()
+    url = URL.query.filter_by(id=url_id, user_id=current_user).first()
+    
+    if not url:
+        return jsonify({"success": False, "message": "URL not found or you don't have permission to delete it"}), 404
+
+    try:
+        db.session.delete(url)
+        db.session.commit()
+        return jsonify({"success": True, "message": "URL deleted successfully"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting URL: {str(e)}")
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/url/<int:url_id>', methods=['GET', 'PUT', 'DELETE'])
+@jwt_required()
+def manage_url(url_id):
+    current_user = get_jwt_identity()
+    url = URL.query.filter_by(id=url_id, user_id=current_user).first()
+    
+    if not url:
+        return jsonify({"success": False, "message": "URL not found"}), 404
+
+    if request.method == 'GET':
+        return jsonify({
+            "id": url.id,
+            "original_url": url.original_url,
+            "short_url": url.short_url,
+            "click_count": url.click_count,
+            "created_at": url.created_at.isoformat()
+        })
+
+    elif request.method == 'PUT':
+        data = request.get_json()
+        new_original_url = data.get('original_url')
+        if new_original_url:
+            url.original_url = new_original_url
+            db.session.commit()
+            return jsonify({"success": True, "message": "URL updated successfully"})
+        return jsonify({"success": False, "message": "Invalid data"}), 400
+
+    elif request.method == 'DELETE':
+        db.session.delete(url)
+        db.session.commit()
+        return jsonify({"success": True, "message": "URL deleted successfully"})
 
 if __name__ == '__main__':
     app.run(debug=True)

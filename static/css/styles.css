@@ -72,14 +72,8 @@ header {
 }
 
 @keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+    from { opacity: 1; }
+    to { opacity: 0; }
 }
 
 .input-focus {
@@ -279,30 +273,45 @@ header {
 }
 
 .url-item {
-    transition: box-shadow 0.3s;
+    transition: opacity 0.1s ease-out;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     margin-bottom: 1rem;
+    background-color: #ffffff;
 }
 
 .url-item:hover {
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: #d0d0d0;
+    background-color: #f8f9fa;
 }
 
 .url-item .card-title {
     font-size: 1.1rem;
     font-weight: bold;
+    color: #007bff;
 }
 
 .url-item .card-text {
     font-size: 1rem;
+    color: #6c757d;
 }
 
 .url-item .small {
     font-size: 0.9rem;
+    color: #868e96;
 }
 
 .url-item .btn-group {
     display: flex;
     flex-wrap: wrap;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.url-item:hover .btn-group {
+    opacity: 1;
 }
 
 .url-item .btn-group .btn {
@@ -310,6 +319,12 @@ header {
     margin: 3px;
     font-size: 0.95rem;
     padding: 0.375rem 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.url-item .btn-group .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 767.98px) {
@@ -363,4 +378,19 @@ header {
 .url-item, .url-header {
     padding-top: 0.5rem !important;
     padding-bottom: 0.5rem !important;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-out {
+    animation: fadeOut 0.15s ease-out forwards;
+    opacity: 0;
+}
+
+/* 如果您想要更平滑的效果，可以添加以下代碼 */
+.url-item {
+    transition: opacity 0.15s ease-out;
 }

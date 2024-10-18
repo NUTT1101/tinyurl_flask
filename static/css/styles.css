@@ -48,13 +48,6 @@ header {
     padding: 10px 15px;
 }
 
-.btn-primary {
-    border-radius: 20px;
-    padding: 10px 0;
-    font-weight: bold;
-    transition: all 0.2s ease;
-}
-
 .btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 3px 10px rgba(0,123,255,0.3);
@@ -393,4 +386,139 @@ header {
 /* 如果您想要更平滑的效果，可以添加以下代碼 */
 .url-item {
     transition: opacity 0.15s ease-out;
+}
+
+
+
+#editUrlModal .modal-body {
+    padding-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+    #editUrlModal .modal-content {
+        border-radius: 10px;
+    }
+
+    #editUrlForm {
+        padding: 15px;
+    }
+
+
+}
+
+#toastContainer {
+    bottom: 0;
+    right: 0;
+}
+
+@media (max-width: 767px) {
+    #toastContainer {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 300px;
+        right: auto;
+    }
+
+    #toast {
+        width: 100%;
+    }
+}
+
+#urlValidationFeedback {
+    display: none;
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+
+#editOriginalUrl.is-invalid {
+    border-color: #dc3545;
+}
+
+#editOriginalUrl.is-valid {
+    border-color: #198754;
+}
+
+.btn-outline-secondary.copy-icon:hover,
+.btn-outline-secondary.show-qr-icon:hover {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary.copy-icon:focus,
+.btn-outline-secondary.show-qr-icon:focus {
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5);
+}
+
+.btn-outline-secondary.copy-icon:active,
+.btn-outline-secondary.show-qr-icon:active {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-custom {
+    color: #5a6268;
+    border-color: #5a6268;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+    color: #ffffff;
+    background-color: #5a6268;
+    border-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-custom:focus {
+    box-shadow: 0 0 0 0.25rem rgba(90, 98, 104, 0.5);
+}
+
+.btn-outline-custom:active {
+    background-color: #4a545b;
+    border-color: #4a545b;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-outline-custom.copy-icon {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-outline-custom.copy-icon:hover {
+    color: #ffffff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-outline-custom.show-qr-icon {
+    color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-outline-custom.show-qr-icon:hover {
+    color: #ffffff;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+}
+
+@media (min-width: 576px) {
+    .modal-dialog-centered {
+        min-height: calc(100% - 3.5rem);
+    }
+}
+
+.modal-content {
+    margin: auto;
 }

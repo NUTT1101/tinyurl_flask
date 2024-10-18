@@ -72,27 +72,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // 顯示QR碼
     function showQRCode(e) {
         const url = e.target.dataset.url;
-        const qrCodeContainer = document.createElement('div');
-        new QRCode(qrCodeContainer, {
-            text: url,
-            width: 256,
-            height: 256
-        });
-        const modal = document.createElement('div');
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        modal.style.display = 'flex';
-        modal.style.justifyContent = 'center';
-        modal.style.alignItems = 'center';
-        modal.appendChild(qrCodeContainer);
-        document.body.appendChild(modal);
-        modal.addEventListener('click', () => {
-            document.body.removeChild(modal);
-        });
+        console.log("URL for QR Code:", url);
+
+        if (!url || !isValidUrl(url)) {
+            console.error("Invalid URL for QR Code generation");
+            alert("無法生成 QR 碼：無效的 URL");
+            return;
+        }
+
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+        qrCodeContainer.innerHTML = ''; // 清空容器
+
+        try {
+            new QRCode(qrCodeContainer, {
+                text: url,
+                width: 256,
+                height: 256,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+            qrModal.show();
+        } catch (error) {
+            console.error("QR Code generation error:", error);
+            alert("生成 QR 碼時發生錯誤");
+        }
+    }
+
+    // 添加一個函數來驗證 URL
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     // 處理登出
@@ -110,3 +125,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始加載URL列表
     fetchAndDisplayUrls();
 });
+

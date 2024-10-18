@@ -81,7 +81,7 @@
     </div>
 
     <!-- Toast 通知 -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toastContainer" class="position-fixed p-3" style="z-index: 11">
         <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <strong class="me-auto">通知</strong>
@@ -93,14 +93,16 @@
 
     <!-- QR 碼模態框 -->
     <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="qrModalLabel">短網址 QR 碼</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <div id="qrCodeContainer"></div>
+                    <a class="h3" id="qrCodeUrl" target="_blank"></a>
+                    <p></p>
+                    <div id="qrCodeModalContainer"></div>
                 </div>
             </div>
         </div>
@@ -108,7 +110,7 @@
 
     <!-- 編輯 URL 模態框 -->
     <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editUrlModalLabel">編輯短網址</h5>
@@ -120,9 +122,32 @@
                         <div class="mb-3">
                             <label for="editOriginalUrl" class="form-label">原始網址</label>
                             <input type="url" class="form-control" id="editOriginalUrl" required>
+                            <div id="urlValidationFeedback" class="invalid-feedback"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary">更新</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary" id="updateUrlBtn" disabled>更新</button>
+                        </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 確認刪除模態框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">確認刪除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    您確定要刪除這個短網址嗎？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">刪除</button>
                 </div>
             </div>
         </div>
@@ -130,7 +155,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

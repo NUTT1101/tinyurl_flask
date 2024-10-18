@@ -31,7 +31,7 @@ URL_LIMITS = {
 # 輔助函數
 def generate_short_url():
     characters = string.ascii_letters + string.digits
-    return ''.join(random.choice(characters) for _ in range(6))
+    return ''.join(random.choice(characters) for _ in range(1, 5))
 
 def generate_qr_code(url):
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -96,7 +96,7 @@ def dashboard():
     user = User.query.get(current_user_id)
     return render_template('dashboard.html', username=user.username)
 
-@app.route('/shorten', methods=['POST'])
+@app.route('/api/shorten', methods=['POST'])
 @jwt_required()
 def shorten_url():
     user_id = get_jwt_identity()

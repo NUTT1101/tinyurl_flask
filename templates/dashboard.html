@@ -59,12 +59,20 @@
                                 </div>
                             </form>
                             <div id="result" class="mt-4 text-center" style="display: none;">
-                                <h3>縮短結果</h3>
                                 <div id="alreadyShortenedMessage" class="text-danger mb-2" style="display: none;">您已縮過該網址</div>
                                 <p id="shortUrlResult">
-                                    短網址: <a href="#" id="shortUrl" target="_blank"></a>
-                                    <i class="bi bi-clipboard copy-icon" data-clipboard-target="#shortUrl"></i>
-                                    <i class="bi bi-check-lg text-success copy-success-icon" style="display: none;"></i>
+                                    <h4 id="UrlResultTitle">短網址</h4>
+                                    <a href="#" id="shortUrl" class="btn btn-outline-primary" target="_blank"></a>
+                                    <button class="btn btn-outline-secondary copy-icon" data-clipboard-target="#shortUrl">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success copy-success-icon" style="display: none;" disabled>
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <p id="scrollToQR"></p>
+                                    <div id="qrCodeContainer" class="mt-3">
+                                        <img id="qrCodeResult"></img>
+                                    </div>
                                 </p>
                                 <div id="qrCodeContainer" class="mt-3"></div>
                             </div>

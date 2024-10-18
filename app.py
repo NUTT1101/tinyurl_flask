@@ -132,11 +132,10 @@ def shorten_url():
     db.session.add(new_url)
     db.session.commit()
 
-    qr_code = generate_qr_code(f"{request.host_url}{short_url}")
     current_app.logger.info(f"New URL shortened: {short_url} for user {user.username}")
     return jsonify({
+        "success": True,
         "short_url": f"{request.host_url}{short_url}",
-        "qr_code": qr_code
     }), 201
 
 @app.route('/<short_url>')

@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 shortUrlLink.href = data.short_url;
                 shortUrlLink.textContent = data.short_url;
                 resultDiv.style.display = 'block';
-                generateQRCode(data.short_url);
+                displayResult(data);
+                showToast('短網址產生成功');
             } else {
                 showToast(data.message || '縮短網址時發生錯誤');
             }
@@ -100,11 +101,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function generateQRCode(url) {
-        QRCode.toCanvas(qrCodeContainer, url, function (error) {
-            if (error) console.error('QR Code 生成錯誤:', error);
-        });
-    }
+    const clipboard = new ClipboardJS('.copy-icon');
+    clipboard.on('success', function(e) {
+        const shortUrl = document.getElementById('shortUrl').href;
+        navigator.clipboard.writeText(shortUrl);
+        const copy = document.querySelector('.copy-icon');
+        const success = document.querySelector('.copy-success-icon');
+        copy.style.display = 'none';
+        success.style.display = 'inline-block';
+        setTimeout(() => {
+            copy.style.display = 'inline-block';
+            success.style.display = 'none';
+        }, 2000);
+        showToast('短網址已複製到剪貼簿');
+        e.clearSelection();
+    });
 
     function formatDate(dateString) {
         const options = { 
@@ -166,12 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function addUrlEventListeners() {
-        const clipboard = new ClipboardJS('.copy-icon');
-        clipboard.on('success', function(e) {
-            showToast('短網址已複製到剪貼簿');
-            e.clearSelection();
-        });
-
         document.querySelectorAll('.show-qr-icon').forEach(button => {
             button.addEventListener('click', function() {
                 const shortCode = this.getAttribute('data-url');
@@ -368,6 +373,25 @@ document.addEventListener('DOMContentLoaded', function() {
         toastBody.textContent = message;
         const toast = new bootstrap.Toast(document.getElementById('toast'));
         toast.show();
+    }
+
+    function displayResult(data) {
+        const qrCodeCanvas = document.getElementById('qrCodeResult');
+    
+        // 生成 QR 码
+        new QRious({
+            element: qrCodeCanvas,
+            value: data.short_url,
+            size: 300,
+        });
+
+        // 滚动到 #UrlResultTitle 元素
+        setTimeout(() => {
+            const finalElement = document.getElementById('scrollToQR');
+            if (finalElement) {
+                finalElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
     }
 
     // 初始化頁面

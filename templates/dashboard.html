@@ -6,6 +6,8 @@
     <title>縮! - 儀表板</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <!-- 添加 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -19,7 +21,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <span class="nav-link">歡迎，{{ username }}</span>
+                            <span class="nav-link">{{ username }} | 等級：<a style="color: #{{ color_code }};">{{ user_role }}</a></span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#shorten" id="homeLink">首頁</a>
@@ -59,9 +61,8 @@
                                 </div>
                             </form>
                             <div id="result" class="mt-4 text-center" style="display: none;">
-                                <div id="alreadyShortenedMessage" class="text-danger mb-2" style="display: none;">您已縮過該網址</div>
                                 <p id="shortUrlResult">
-                                    <h4 id="UrlResultTitle">短網址</h4>
+                                    <h4 id="UrlResultTitle">結果</h4>
                                     <a href="#" id="shortUrl" class="btn btn-outline-primary" target="_blank"></a>
                                     <button class="btn btn-outline-secondary copy-icon" data-clipboard-target="#shortUrl">
                                         <i class="bi bi-clipboard"></i>
@@ -84,6 +85,8 @@
 
         <div id="myUrlsSection" style="display: none;">
             <h2 class="text-center mb-4">我的網址</h2>
+            <p class="text-center text-muted">目前有 <span id="userUrlsCount" class="text-primary"></span> 個網址 | 總共可縮 <span id="userUrlLimit" style="color: #{{ color_code }};"></span> 個網址</p>
+            <p class="text-center text-muted" style="display: none;" id="noUrlsMessage">目前沒有任何網址 | <a href="/dashboard#shorten" style="text-decoration: none;">立即開縮!</a></p>
             <div id="urlList"></div>
         </div>
     </div>
@@ -104,7 +107,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="qrModalLabel">短網址 QR 碼</h5>
+                    <h5 class="modal-title" id="qrModalLabel">短網址 QR-Code</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">

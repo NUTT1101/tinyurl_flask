@@ -1,6 +1,22 @@
+/* 在文件的開頭添加以下樣式 */
 body {
     background-color: #f8f9fa;
-    font-family: 'Arial', sans-serif;
+    font-family: 'Noto Sans TC', 'Roboto', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.btn {
+    font-weight: 500;
 }
 
 header {
@@ -97,8 +113,21 @@ header {
 }
 
 #urlList {
-    max-height: 500px;
     overflow-y: auto;
+    padding-right: 10px; /* 為滾動條留出空間 */
+    margin-bottom: 20px; /* 添加底部邊距 */
+}
+
+/* 默認樣式（手機） */
+#urlList {
+    max-height: calc(85vh - 100px);
+}
+
+/* 電腦屏幕樣式 */
+@media screen and (min-width: 768px) {
+    #urlList {
+        max-height: calc(90vh - 100px);
+    }
 }
 
 .url-item {

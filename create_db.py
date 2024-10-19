@@ -13,7 +13,6 @@ def create_database():
         engine = create_engine(Config.SQLALCHEMY_DATABASE_URI.rsplit('/', 1)[0])
         with engine.connect() as conn:
             conn.execute(text("CREATE DATABASE IF NOT EXISTS tinyurl"))
-            conn.commit()
 
         # 創建表
         db.create_all()

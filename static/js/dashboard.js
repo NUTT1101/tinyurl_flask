@@ -85,12 +85,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json()
         })
         .then(data => {
-            if (data.success) {
+            if (data.short_url) {
                 shortUrlLink.href = data.short_url;
                 shortUrlLink.textContent = data.short_url;
                 resultDiv.style.display = 'block';
                 displayResult(data);
-                showToast('短網址產生成功');
+                if (data.success) {
+                    showToast('短網址產生成功');
+                } else {
+                    showToast(data.message);
+                }
             } else {
                 showToast(data.message || '縮短網址時發生錯誤');
             }
@@ -102,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const clipboard = new ClipboardJS('.copy-icon');
+    const clipboardMyUrl = new ClipboardJS('.copy-icon-myurl');
     clipboard.on('success', function(e) {
         const shortUrl = document.getElementById('shortUrl').href;
         navigator.clipboard.writeText(shortUrl);
@@ -117,6 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
         e.clearSelection();
     });
 
+    clipboardMyUrl.on('success', function(e) {
+        const button = e.trigger;
+        const originalUrl = button.getAttribute('data-clipboard-text');
+        navigator.clipboard.writeText(`${window.location.origin}/${originalUrl}`);
+        showToast('已複製到剪貼簿');
+        e.clearSelection();
+    });
+
     function formatDate(dateString) {
         const options = { 
             year: 'numeric', 
@@ -129,44 +142,65 @@ document.addEventListener('DOMContentLoaded', function() {
         return new Date(dateString).toLocaleString('zh-TW', options);
     }
 
+    function fetchAndDisplayUserUrlsCount() {
+        fetch('/api/my_urls_count')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('userUrlsCount').textContent = data.count;
+            document.getElementById('userUrlLimit').textContent = data.limit;
+        });
+    }
+
+    function fetchAndDisplayNoUrlsMessage(length) {
+        if (length == 0) {
+            document.getElementById('noUrlsMessage').style.display = 'block';
+        } else {
+            document.getElementById('noUrlsMessage').style.display = 'none';
+        }
+    }
+
     function fetchAndDisplayUrls() {
         fetch('/api/my_urls')
         .then(response => response.json())
         .then(data => {
-            urlList.innerHTML = data.map(url => `
-                <div class="url-item card mb-3" data-id="${url.id}">
-                    <div class="card-body">
-                        <h5 class="card-title text-truncate">
-                            <a href="${url.short_url}" target="_blank">${url.short_url}</a>
-                        </h5>
-                        <p class="card-text text-truncate">${url.original_url}</p>
-                        <p class="card-text"><small class="text-muted">點擊次數: ${url.click_count}</small></p>
-                        <p class="card-text"><small class="text-muted">創建時間: ${formatDate(url.created_at)}</small></p>
-                        <div class="row g-2">
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-custom w-100 copy-icon" data-clipboard-text="${url.short_url}" title="複製">
-                                    <i class="bi bi-clipboard"></i> 複製
-                                </button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-custom w-100 show-qr-icon" data-url="${url.short_url}" title="QR碼">
-                                    <i class="bi bi-qr-code"></i> QR碼
-                                </button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-primary w-100 edit-url" data-id="${url.id}" title="編輯">
-                                    <i class="bi bi-pencil"></i> 編輯
-                                </button>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <button class="btn btn-outline-danger w-100 delete-url" data-id="${url.id}" title="刪除">
-                                    <i class="bi bi-trash"></i> 刪除
-                                </button>
+            fetchAndDisplayUserUrlsCount();
+            fetchAndDisplayNoUrlsMessage(data.length);
+            if (data.length != 0) {
+                urlList.innerHTML = data.map(url => `
+                    <div class="url-item card mb-3" data-id="${url.id}">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                <a href="${url.short_url}" target="_blank">${url.short_url}</a>
+                            </h5>
+                            <p class="card-text text-truncate">${url.original_url}</p>
+                            <p class="card-text"><small class="text-muted">點擊次數: ${url.click_count}</small></p>
+                            <p class="card-text"><small class="text-muted">創建時間: ${formatDate(url.created_at)}</small></p>
+                            <div class="row g-2">
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-outline-custom w-100 copy-icon-myurl" data-clipboard-text="${url.short_url}" title="複製">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-outline-custom w-100 show-qr-icon" data-url="${url.short_url}" title="QR碼">
+                                        <i class="bi bi-qr-code"></i>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-outline-primary w-100 edit-url" data-id="${url.id}" title="編輯">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <button class="btn btn-outline-danger w-100 delete-url" data-id="${url.id}" title="刪除">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
 
             addUrlEventListeners();
         })
@@ -293,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showToast('短網址已成功更新');
+                showToast(data.message);
                 fetchAndDisplayUrls();
                 editUrlModal.hide();
             } else {
@@ -322,12 +356,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
-            console.log('Delete response:', data);
             if (data.success) {
                 urlItem.classList.add('fade-out');
                 setTimeout(() => {
                     urlItem.remove();
-                    showToast('短網址已成刪除');
+                    fetchAndDisplayUserUrlsCount();
+                    document.getElementById('result').style.display = 'none';
+                    if (!urlList.children.length) {
+                        fetchAndDisplayNoUrlsMessage(urlList.children.length);
+                    }
+                    showToast(data.message);
                 }, 150);
             } else {
                 showToast('刪除失敗：' + (data.message || '未知錯誤'));
@@ -359,12 +397,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 window.location.href = '/';
             } else {
-                showToast('登出失敗');
+                showToast(data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('登出時發生錯誤');
+            showToast(data.message);
         });
     });
 
@@ -378,14 +416,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayResult(data) {
         const qrCodeCanvas = document.getElementById('qrCodeResult');
     
-        // 生成 QR 码
         new QRious({
             element: qrCodeCanvas,
             value: data.short_url,
             size: 300,
         });
 
-        // 滚动到 #UrlResultTitle 元素
         setTimeout(() => {
             const finalElement = document.getElementById('scrollToQR');
             if (finalElement) {
@@ -394,6 +430,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     }
 
-    // 初始化頁面
     handleHashChange();
 });

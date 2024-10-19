@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === "Login successful") {
+                if (data.success) {
                     window.location.href = '/dashboard';
                 } else {
                     alert(data.message);
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            const inviteCode = document.getElementById('inviteCode').value;
             const username = document.getElementById('registerUsername').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
@@ -65,12 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ inviteCode, username, email, password }),
             })
             .then(response => response.json())
             .then(data => {
                 alert(data.message);
-                if (data.message === "User created successfully") {
+                if (data.success) {
                     switchForm(registerContainer, loginContainer);
                 }
             })

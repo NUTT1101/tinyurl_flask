@@ -549,3 +549,152 @@ header {
 .modal-content {
     margin: auto;
 }
+
+/* URL 卡片樣式 */
+.url-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.url-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.url-item .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.url-item .card-subtitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.url-item .btn-group {
+    gap: 0.5rem;
+}
+
+.url-item .btn-group .btn {
+    flex: 1;
+    padding: 0.375rem;
+}
+
+.url-item .btn-group .btn i {
+    font-size: 1rem;
+}
+
+/* 確保按鈕在小螢幕上也能正常顯示 */
+@media (max-width: 576px) {
+    .url-item .btn-group {
+        flex-wrap: nowrap;
+    }
+    
+    .url-item .btn-group .btn {
+        padding: 0.25rem;
+    }
+}
+
+/* 動畫效果 */
+.url-item.fade-out {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* 表格樣式 */
+.table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-weight: 600;
+    padding: 12px;
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table .btn-group .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.table .btn-group .btn i {
+    font-size: 0.875rem;
+}
+
+/* 確保表格在小螢幕上可以水平滾動 */
+.table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 動畫效果 */
+.table tbody tr.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* 手機版表格樣式 */
+@media (max-width: 767.98px) {
+    .mobile-url-info {
+        padding: 1rem;
+    }
+
+    .mobile-url-info strong {
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    .mobile-url-info .text-truncate {
+        max-width: 100%;
+    }
+
+    .url-row {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .url-row:last-child {
+        border-bottom: none;
+    }
+
+    .table td {
+        padding: 0;
+    }
+
+    .mobile-url-info .btn-group {
+        gap: 0.5rem;
+    }
+}
+
+/* 確保在所有螢幕尺寸下的按鈕樣式一致 */
+.btn-group .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-group .btn i {
+    margin: 0;
+}

@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const shortenForm = document.getElementById('shortenForm');
     const resultDiv = document.getElementById('result');
     const shortUrlLink = document.getElementById('shortUrl');
-    const qrCodeContainer = document.getElementById('qrCodeContainer');
     const urlList = document.getElementById('urlList');
     const logoutLink = document.getElementById('logout');
     const homeLink = document.getElementById('homeLink');
@@ -16,9 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
     const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
     const editUrlModal = new bootstrap.Modal(document.getElementById('editUrlModal'));
-
+    const allLevelsModal = new bootstrap.Modal(document.getElementById('allLevelsModal'));
+    const userRole = document.getElementById('userRole');
 
     let urlToDelete = null;
+
+    userRole.addEventListener('click', function() {
+        allLevelsModal.show();
+    });
 
     function showSection(sectionId) {
         const sections = [shortenUrlSection, myUrlsSection];
@@ -73,18 +77,21 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         const originalUrl = document.getElementById('originalUrl').value;
         const customShortUrl = document.getElementById('customShortUrl').value;
+        const comment = document.getElementById('comment').value;
 
         fetch('/api/shorten', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ original_url: originalUrl, custom_short_url: customShortUrl }),
+            body: JSON.stringify({ original_url: originalUrl, custom_short_url: customShortUrl, comment: comment }),
         })
         .then(response => {
+		console.log(response);
             return response.json()
         })
         .then(data => {
+            console.log(data);
             if (data.short_url) {
                 shortUrlLink.href = data.short_url;
                 shortUrlLink.textContent = data.short_url;
@@ -102,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showToast('縮短網址時發生錯');
+            window.location.href = '/';
         });
     });
 
@@ -165,48 +173,113 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             fetchAndDisplayUserUrlsCount();
             fetchAndDisplayNoUrlsMessage(data.length);
+
             if (data.length != 0) {
+                document.getElementById('urlListContainer').style.display = 'block';
                 urlList.innerHTML = data.map(url => `
-                    <div class="url-item card mb-3" data-id="${url.id}">
-                        <div class="card-body">
-                            <h5 class="card-title text-truncate">
-                                <a href="${url.short_url}" target="_blank">${url.short_url}</a>
-                            </h5>
-                            <p class="card-text text-truncate">${url.original_url}</p>
-                            <p class="card-text"><small class="text-muted">點擊次數: ${url.click_count}</small></p>
-                            <p class="card-text"><small class="text-muted">創建時間: ${formatDate(url.created_at)}</small></p>
-                            <div class="row g-2">
-                                <div class="col-6 col-md-3">
-                                    <button class="btn btn-outline-custom w-100 copy-icon-myurl" data-clipboard-text="${url.short_url}" title="複製">
-                                        <i class="bi bi-clipboard"></i>
-                                    </button>
+                    <tr class="url-row" data-id="${url.id}">
+                        <!-- 手機版顯示 -->
+                        <td class="d-md-none">
+                            <div class="mobile-url-info">
+                                <div class="mb-2">
+                                    <strong>短網址：</strong>
+                                    <div class="d-flex align-items-center mt-1">
+                                        <a href="${url.short_url}" class="text-truncate me-2" target="_blank" style="max-width: 180px;">
+                                            ${url.short_url}
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-primary copy-icon-myurl" 
+                                                data-clipboard-text="${url.short_url}" title="複製">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <button class="btn btn-outline-custom w-100 show-qr-icon" data-url="${url.short_url}" title="QR碼">
-                                        <i class="bi bi-qr-code"></i>
-                                    </button>
+                                <div class="mb-2">
+                                    <strong>原始網址：</strong>
+                                    <div class="text-truncate mt-1" style="max-width: 200px;">
+                                        ${url.original_url}
+                                    </div>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <button class="btn btn-outline-primary w-100 edit-url" data-id="${url.id}" title="編輯">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
+                                <div class="mb-2">
+                                    <strong>備註：</strong>
+                                    <div class="text-truncate mt-1" style="max-width: 200px;">
+                                        ${url.comment || '-'}
+                                    </div>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <button class="btn btn-outline-danger w-100 delete-url" data-id="${url.id}" title="刪除">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                <div class="mb-2">
+                                    <strong>點擊次數：</strong>
+                                    <span class="ms-1">${url.click_count}</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between gap-2" role="group">
+                                        <button class="btn btn-sm btn-outline-primary show-qr-icon flex-grow-1" 
+                                                data-url="${url.short_url}" title="QR碼">
+                                            <i class="bi bi-qr-code"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary edit-url flex-grow-1" 
+                                                data-id="${url.id}" title="編輯">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-url flex-grow-1" 
+                                                data-id="${url.id}" title="刪除">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+                        </td>
 
-            addUrlEventListeners();
+                        <!-- 電腦版顯示 -->
+                        <td class="d-none d-md-table-cell">
+                            <div class="d-flex align-items-center">
+                                <span class="d-md-none me-2"><strong>短網址：</strong></span>
+                                <a href="${url.short_url}" class="text-truncate me-2" target="_blank" style="max-width: 200px;">
+                                    ${url.short_url}
+                                </a>
+                                <button class="btn btn-sm btn-outline-primary copy-icon-myurl" 
+                                        data-clipboard-text="${url.short_url}" title="複製">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <div class="text-truncate" style="max-width: 300px;">
+                                ${url.original_url}
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <div class="text-truncate" style="max-width: 150px;">
+                                ${url.comment || '-'}
+                            </div>
+                        </td>
+                        <td class="d-none d-md-table-cell text-center">
+                            ${url.click_count}
+                        </td>
+                        <td class="d-none d-md-table-cell">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary show-qr-icon" 
+                                        data-url="${url.short_url}" title="QR碼">
+                                    <i class="bi bi-qr-code"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary edit-url" 
+                                        data-id="${url.id}" title="編輯">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger delete-url" 
+                                        data-id="${url.id}" title="刪除">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                addUrlEventListeners();
+            }
         })
         .catch(error => {
             console.error('Error fetching URLs:', error);
             showToast('加載 URL 列表時發生錯誤');
+            window.location.href = '/';
         });
     }
 
@@ -242,13 +315,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
+        
         document.querySelectorAll('.edit-url').forEach(button => {
             button.addEventListener('click', function() {
                 const urlId = this.getAttribute('data-id');
-                const urlItem = this.closest('.url-item');
-                const originalUrl = urlItem.querySelector('.card-text').textContent.replace('原始網址: ', '');
+                const row = this.closest('tr');
+                
+                // 檢查是否為手機版或桌面版
+                let originalUrl, comment;
+                if (row.querySelector('.d-md-none')) {
+                    // 手機版
+                    originalUrl = row.querySelector('.mobile-url-info div:nth-child(2) div.text-truncate').textContent.trim();
+                    comment = row.querySelector('.mobile-url-info div:nth-child(3) div.mt-1').textContent.trim();
+                } else {
+                    // 桌面版
+                    originalUrl = row.querySelector('td:nth-child(2) div.text-truncate').textContent.trim();
+                    comment = row.querySelector('td:nth-child(3) div.text-truncate').textContent.trim();
+                }
+
                 document.getElementById('editUrlId').value = urlId;
                 document.getElementById('editOriginalUrl').value = originalUrl;
+                document.getElementById('editComment').value = comment === '-' ? '' : comment;
                 editUrlModal.show();
             });
         });
@@ -261,68 +348,104 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    editOriginalUrl.addEventListener('input', validateUrl);
+    // 修改 validateForm 函數
+    function validateForm() {
+        const url = editOriginalUrl.value.trim();
+        const comment = document.getElementById('editComment').value;
+        let isValid = isValidUrl(url);
 
+        // 檢查是否有任何變更（URL 或備註）
+        const urlId = document.getElementById('editUrlId').value;
+        const row = document.querySelector(`tr[data-id="${urlId}"]`);
+        
+        if (!row) {
+            console.error('找不到對應的行元素');
+            return;
+        }
+
+        let originalUrl, originalComment;
+        
+        if (row.querySelector('.d-md-none')) {
+            // 手機版
+            originalUrl = row.querySelector('.mobile-url-info div:nth-child(2) div.text-truncate').textContent.trim();
+            originalComment = row.querySelector('.mobile-url-info div:nth-child(3) div.mt-1').textContent.trim();
+        } else {
+            // 桌面版
+            originalUrl = row.querySelector('td:nth-child(2) div.text-truncate').textContent.trim();
+            originalComment = row.querySelector('td:nth-child(3) div.text-truncate').textContent.trim();
+        }
+        originalComment = originalComment === '-' ? '' : originalComment;
+
+        // 檢查是否有任何變更（URL 或備註）
+        const hasUrlChanged = url !== originalUrl;
+        const hasCommentChanged = comment !== originalComment;
+        const hasChanges = hasUrlChanged || hasCommentChanged;
+
+        // 更新 URL 輸入框的視覺反饋
+        if (!isValid) {
+            editOriginalUrl.classList.remove('is-valid');
+            editOriginalUrl.classList.add('is-invalid');
+            urlValidationFeedback.textContent = '請輸入有效的網址';
+            urlValidationFeedback.style.display = 'block';
+        } else {
+            editOriginalUrl.classList.remove('is-invalid');
+            editOriginalUrl.classList.add('is-valid');
+            urlValidationFeedback.style.display = 'none';
+        }
+
+        // 更新按鈕狀態
+        updateUrlBtn.disabled = hasUrlChanged ? !isValid || !hasChanges : !hasChanges;
+    }
+
+    // 修改事件監聽器
+    editOriginalUrl.addEventListener('input', validateForm);
+    document.getElementById('editComment').addEventListener('input', validateForm);
+
+    // 修改模態框顯示事件處理
     document.getElementById('editUrlModal').addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
         if (button) {
             const urlId = button.getAttribute('data-id');
-            const urlItem = document.querySelector(`.url-item[data-id="${urlId}"]`);
-            const originalUrl = urlItem.querySelector('.card-text').textContent;
-    
+            const row = document.querySelector(`tr[data-id="${urlId}"]`);
+            
+            let originalUrl, comment;
+            if (row.querySelector('.d-md-none')) {
+                // 手機版
+                originalUrl = row.querySelector('.mobile-url-info div:nth-child(2) div.text-truncate').textContent.trim();
+                comment = row.querySelector('.mobile-url-info div:nth-child(3) div.mt-1').textContent.trim();
+            } else {
+                // 桌面版
+                originalUrl = row.querySelector('td:nth-child(2) div.text-truncate').textContent.trim();
+                comment = row.querySelector('td:nth-child(3) div.text-truncate').textContent.trim();
+            }
+
             document.getElementById('editUrlId').value = urlId;
             editOriginalUrl.value = originalUrl;
+            document.getElementById('editComment').value = comment === '-' ? '' : comment;
             
             // 重置表單狀態
             editOriginalUrl.classList.remove('is-valid', 'is-invalid');
             urlValidationFeedback.style.display = 'none';
             urlValidationFeedback.textContent = '';
-            updateUrlBtn.disabled = false;
-    
-            // 立即驗證 URL
-            validateUrl();
+            updateUrlBtn.disabled = true;  // 初始狀態設為禁用
         }
     });
-
-    function validateUrl() {
-        const url = editOriginalUrl.value.trim();
-        let isValid = isValidUrl(url);
-
-        if (isValid) {
-            editOriginalUrl.classList.remove('is-invalid');
-            editOriginalUrl.classList.add('is-valid');
-            urlValidationFeedback.style.display = 'none';
-            updateUrlBtn.disabled = false;
-        } else {
-            editOriginalUrl.classList.remove('is-valid');
-            editOriginalUrl.classList.add('is-invalid');
-            urlValidationFeedback.textContent = '請輸入有效的網址';
-            urlValidationFeedback.style.display = 'block';
-            updateUrlBtn.disabled = true;
-        }
-    }
-
-    function isValidUrl(string) {
-        const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // 協議
-            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // 域名
-            '((\\d{1,3}\\.){3}\\d{1,3}))'+ // 或 IP (v4) 地址
-            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // 端口和路徑
-            '(\\?[;&a-z\\d%_.~+=-]*)?'+ // 查詢字符串
-            '(\\#[-a-z\\d_]*)?$','i'); // 錨點
-        return !!urlPattern.test(string);
-    }
 
     document.getElementById('editUrlForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const urlId = document.getElementById('editUrlId').value;
-        const newUrl = editOriginalUrl.value;
+        const newUrl = document.getElementById('editOriginalUrl').value;
+        const newComment = document.getElementById('editComment').value;
 
         fetch(`/api/url/${urlId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ original_url: newUrl }),
+            body: JSON.stringify({ 
+                original_url: newUrl,
+                comment: newComment
+            }),
         })
         .then(response => response.json())
         .then(data => {
@@ -337,12 +460,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showToast('更新時發生錯誤');
+            window.location.href = '/';
         });
     });
 
     function deleteUrl(urlId) {
-        const urlItem = document.querySelector(`.url-item[data-id="${urlId}"]`);
+        // 修改選擇器以匹配表格行
+        const row = document.querySelector(`tr[data-id="${urlId}"]`);
         
+        if (!row) {
+            console.error('找不到要刪除的行');
+            return;
+        }
+
         fetch(`/api/url/${urlId}`, { 
             method: 'DELETE',
             headers: {
@@ -357,9 +487,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
-                urlItem.classList.add('fade-out');
+                row.classList.add('fade-out');
                 setTimeout(() => {
-                    urlItem.remove();
+                    row.remove();
                     fetchAndDisplayUserUrlsCount();
                     document.getElementById('result').style.display = 'none';
                     if (!urlList.children.length) {
@@ -374,6 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showToast('刪除時發生錯誤');
+            window.location.href = '/';
         });
     }
 
@@ -403,6 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             showToast(data.message);
+            window.location.href = '/';
         });
     });
 
@@ -428,6 +560,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 finalElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }, 100);
+    }
+
+    // 添加 URL 驗證函數
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     handleHashChange();

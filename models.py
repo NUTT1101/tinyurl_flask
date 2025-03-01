@@ -25,19 +25,12 @@ class URL(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     original_url = db.Column(db.String(2048), nullable=False)
     short_url = db.Column(db.String(20), unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     click_count = db.Column(db.Integer)
     created_at = db.Column(db.DateTime)
-    accesses = db.relationship('URLAccess', backref='url', lazy='dynamic', cascade='all, delete-orphan')
-
-class URLAccess(db.Model):
-    __tablename__ = 'url_access'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    url_id = db.Column(db.Integer, db.ForeignKey('urls.id'), nullable=False)
-    access_time = db.Column(db.DateTime)
-    ip_address = db.Column(db.String(45), nullable=False)
+    comment = db.Column(db.String(256))
 
 class UserRole(db.Model):
     __tablename__ = 'user_roles'
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True, nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)

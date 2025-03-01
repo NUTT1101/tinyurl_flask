@@ -14,14 +14,14 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
-                <a class="navbar-brand" href="#">縮!</a>
+                <a class="navbar-brand href=""#">縮!</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <span class="nav-link">{{ username }} | 等級：<a style="color: #{{ color_code }};">{{ user_role }}</a></span>
+                            <span class="nav-link">{{ username }} | 等級：<a id="userRole" style="color: #{{ color_code }};">{{ user_role }}</a></span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#shorten" id="homeLink">首頁</a>
@@ -48,13 +48,17 @@
                             <form id="shortenForm">
                                 <div class="mb-3">
                                     <label for="originalUrl" class="form-label">原始網址</label>
-                                    <input type="url" class="form-control" id="originalUrl" required>
+                                    <input type="url" class="form-control" id="originalUrl" required placeholder="請輸入要縮的網址">
                                     <div id="originalUrlError" class="invalid-feedback"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="customShortUrl" class="form-label">自訂短網址 (選填)</label>
-                                    <input type="text" class="form-control" id="customShortUrl" pattern="[a-zA-Z0-9]{1,20}" title="最多20個字元，只能包含大小寫英文和數字">
+                                    <input type="text" class="form-control" id="customShortUrl" pattern="[a-zA-Z0-9-_]{1,20}" title="最多20個字元，只能包含大小寫英文、數字和 - _" placeholder="請輸入自訂短網址">
                                     <div id="customShortUrlError" class="invalid-feedback"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">備註 (選填)</label>
+                                    <input type="text" class="form-control" id="comment" placeholder="請輸入備註">
                                 </div>
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary btn-lg px-5">縮!</button>
@@ -85,9 +89,26 @@
 
         <div id="myUrlsSection" style="display: none;">
             <h2 class="text-center mb-4">我的網址</h2>
-            <p class="text-center text-muted">目前有 <span id="userUrlsCount" class="text-primary"></span> 個網址 | 總共可縮 <span id="userUrlLimit" style="color: #{{ color_code }};"></span> 個網址</p>
+            <p class="text-center text-muted">目前有 <span id="userUrlsCount" class="text-primary"></span> 個網址 | 總共可縮 <span class="text-primary"><a id="userUrlLimit" style="color: #{{ color_code }};"></a></span> 個網址</p>
             <p class="text-center text-muted" style="display: none;" id="noUrlsMessage">目前沒有任何網址 | <a href="/dashboard#shorten" style="text-decoration: none;">立即開縮!</a></p>
-            <div id="urlList"></div>
+            
+            <div class="table-responsive" id="urlListContainer" style="display: none;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="d-md-none">網址資訊</th>
+                            <th scope="col" class="d-none d-md-table-cell" width="25%">短網址</th>
+                            <th scope="col" class="d-none d-md-table-cell" width="35%">原始網址</th>
+                            <th scope="col" class="d-none d-md-table-cell" width="15%">備註</th>
+                            <th scope="col" class="d-none d-md-table-cell" width="10%">點擊次數</th>
+                            <th scope="col" class="d-none d-md-table-cell" width="15%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="urlList">
+                        <!-- 內容將由 JavaScript 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -135,6 +156,10 @@
                             <input type="url" class="form-control" id="editOriginalUrl" required>
                             <div id="urlValidationFeedback" class="invalid-feedback"></div>
                         </div>
+                        <div class="mb-3">
+                            <label for="editComment" class="form-label">備註</label>
+                            <input type="text" class="form-control" id="editComment" placeholder="請輸入備註">
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger" data-bs-dismiss="modal">取消</button>
                             <button type="submit" class="btn btn-primary" id="updateUrlBtn" disabled>更新</button>
@@ -159,6 +184,41 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-danger" id="confirmDeleteBtn">刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顯示所有等級 -->
+    <div id="allLevelsModal" class="modal fade" tabindex="-1" aria-labelledby="allLevelsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="allLevelsModalLabel">等級列表</h5>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover align-middle">
+                        <tbody id="allLevelsTableBody">
+                        </tbody>
+                    </table>
+                    <script>
+                        fetch('/api/levels')
+                            .then(response => response.json())
+                            .then(data => {
+                                const tableBody = document.querySelector('#allLevelsTableBody');
+                                const userRole = document.getElementById('userRole');
+                                tableBody.innerHTML = `<tr><th>等級</th><th>目前等級</th><th>可縮網址數量</th></tr>`;
+                                data.forEach(level => {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `<td style="color: #${level.color_code};">${level.description}</td><td>
+                                        ${level.description === userRole.textContent ? '<i class="bi bi-check-lg"></i>' : '-'}</td><td>${level.url_limit}</td>`;
+                                    tableBody.appendChild(row);
+                                });
+                            });
+                    </script>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>

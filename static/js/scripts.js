@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const showLogin = document.getElementById('showLogin');
     const loginContainer = document.getElementById('loginContainer');
     const registerContainer = document.getElementById('registerContainer');
+    const registerModalBody = document.getElementById('registerModalBody');
+    const modal = new bootstrap.Modal(document.getElementById('registerModal'));
 
     // 添加輸入欄位焦點效果
     const inputs = document.querySelectorAll('input');
@@ -31,12 +33,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ username, password }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.headers.get('content-type').includes('application/json')) {
+                    return response.text().then(text => ({ success: false, message: "登入嘗試過多，請稍後再試" }));
+                } else {
+                    return response.json();
+                }
+            })
             .then(data => {
                 if (data.success) {
                     window.location.href = '/dashboard';
                 } else {
-                    alert(data.message);
+                    registerModalBody.innerHTML = `<p>${data.message}</p>`;
+                    modal.show();
                 }
             })
             .catch((error) => {
@@ -50,14 +59,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const inviteCode = document.getElementById('inviteCode').value;
             const username = document.getElementById('registerUsername').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
             if (password !== confirmPassword) {
-                alert("Passwords do not match");
+                registerModalBody.innerHTML = `<p>輸入的密碼不一致</p>`;
+                modal.show();
                 return;
             }
 
@@ -66,11 +75,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ inviteCode, username, email, password }),
+                body: JSON.stringify({ username, email, password }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.headers.get('content-type').includes('application/json')) {
+                    return response.text().then(text => ({ success: false, message: "註冊嘗試過多，請稍後再試" }));
+                } else {
+                    return response.json();
+                }
+            })
             .then(data => {
-                alert(data.message);
+                registerModalBody.innerHTML = `<p>${data.message}</p>`;
+                modal.show();
                 if (data.success) {
                     switchForm(registerContainer, loginContainer);
                 }

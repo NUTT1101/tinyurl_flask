@@ -15,7 +15,22 @@
     <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
         <div class="text-center fs-1">
             <h1 class="text-danger">404</h1>
-            <p>{{ cause }}</p>
+            <p class="fs-4">{{ cause }}</p>
+            
+            <a id="counter" class="fs-4" style="text-decoration: none;color: black;">10 秒後返回首頁，</a>
+            <a href="{{ url_for('index') }}" class="fs-4">或點擊此處返回首頁</a>
+            <!-- 10秒後返回首頁，顯示剩餘秒數-->
+            <script>
+                let counter = 9;
+                setInterval(function() {
+                    document.getElementById('counter').innerText = counter + " 秒後返回首頁，";
+                    if (counter === 0) {
+                        window.location.href = "{{ url_for('index') }}";
+                    } else {
+                        counter--;
+                    }
+                }, 1000);
+            </script>
         </div>
     </div>
 </body>
